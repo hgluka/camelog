@@ -1,0 +1,4 @@
+(executable
+ (public_name camelog)
+ (name main)
+ (libraries camelog))
