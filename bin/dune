@@ -1,4 +1,5 @@
 (executable
  (public_name camelog)
  (name main)
- (libraries camelog))
+ (libraries util core core_unix.command_unix)
+ (preprocess (pps ppx_jane)))

@@ -18,6 +18,10 @@
 (package
  (name camelog)
  (synopsis "A static blog generator written in OCaml") 
- (depends ocaml))
+ (depends
+   ocaml
+   core
+   ppx_jane
+   cmarkit))
 
 ; See the complete stanza docs at https://dune.readthedocs.io/en/stable/reference/dune-project/index.html

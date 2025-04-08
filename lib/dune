@@ -1,2 +1,4 @@
 (library
- (name camelog))
+ (name util)
+ (public_name camelog.util)
+ (libraries core core_unix.command_unix cmarkit))
