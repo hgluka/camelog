@@ -13,7 +13,19 @@ type page = {
 
 let pages (paths : string list) : page list =
   List.map paths
-    ~f:(fun path -> {
+    ~f:(fun path ->
+        let path_and_ext = Filename.split_extension path in
+        let ptype = match snd path_and_ext with
+          | Some "md" -> Markdown
+          | Some "css" -> Css
+          | _ -> Other in
+        let new_ext = match snd path_and_ext with
+          | Some "md" -> "html"
+          | Some x -> x
+          | None -> "" in
+        let cut_path = Filename.basename (String.chop_prefix_if_exists path ~prefix:input_dir) in
+        {
+          page_type = ptype;
           title = (Filename.basename path);
           full_path = Caml_unix.realpath path;
           relative_path = path

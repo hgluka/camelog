@@ -1,17 +1,3 @@
-<script type="application/racket" id="home-main">
-#lang racket/base
-
-;; This is an application element. It can define a new page.
-(provide replace-page)
-
-;; Use the 'project' link to access your project.
-(require "project/vcomps.rkt"
-         polyglot)
-
-(define (replace-page page-tx)
-  (page "Prijavite se za PLMW" page-tx))
-</script>
-
 Da počnem odmah sa poentom - prijavite se za PLMW! Dobro, verovatno ne znate šta je to. Razumljivo. Zato vam preporučujem da pročitate, 
 kao što sam to i ja uradio, [ovaj tekst](http://composition.al/blog/2019/09/27/apply-to-plmw/) profesorke Lindsi Kuper, koji me je 
 inspirisao da se prijavim. Ukratko, PLMW (Programming Languages Mentoring Workshop) je radionica namenjena studentima koji su zainteresovani za akademsku karijeru u polju programskih jezika. 

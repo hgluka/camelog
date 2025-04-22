@@ -1,17 +1,3 @@
-<script type="application/racket" id="home-main">
-#lang racket/base
-
-;; This is an application element. It can define a new page.
-(provide replace-page)
-
-;; Use the 'project' link to access your project.
-(require "project/vcomps.rkt"
-         polyglot)
-
-(define (replace-page page-tx)
-  (page "Island generation with Typed Racket" page-tx))
-</script>
-
 Last year I wrote a small procedural island generator in Racket called [procsland](https://github.com/hgluka/procsland). I know, the name sucks. I'm not very good at names. Aside from the name, though, I took a good look at the code this week and I realised I'm not very good at that either. 
 The generator was really a cellular automaton with hexagonal cells. Each cell had 6 neighbours. If a cell with water is surrounded by too little or a too much land, it turned into land. Pretty straightforward stuff, aside from a bit of [hexagonal grid math](https://www.redblobgames.com/grids/hexagons/). The trouble is, I didn't really adopt a very functional style for the code. I used a straight list to represent the map, but that was about it. Lots of `list-ref`s and lots of awkward iteration. For some reason, a bunch of double quoted values popped up in the code (`''land` instead of `'land`) so there were snippets like this one:
 
