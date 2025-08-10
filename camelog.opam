@@ -12,6 +12,7 @@ depends: [
   "ocaml"
   "core"
   "ppx_jane"
+  "fileutils"
   "cmarkit"
   "odoc" {with-doc}
 ]
