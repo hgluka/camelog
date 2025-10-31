@@ -21,7 +21,7 @@ let string_of_ptype pt = match pt with
 let string_of_page p =
   String.concat ["page: { title = \""; p.title; "\", relative_path = "; p.relative_path; ", type = "; string_of_ptype p.page_type; " }"]
 
-let pages (input_dir: string) (output_dir: string) (paths : string list) : page list =
+let pages input_dir output_dir paths =
   List.map paths
     ~f:(fun path ->
         let path_and_ext = Filename.split_extension path in
@@ -60,7 +60,7 @@ let regular_file = fun filename ->
   | `No -> failwith "Not a regular file"
   | `Unknown -> failwith "Could not determine if file is regular"
 
-let md_to_html (title:string) (md:string) (template:string) : string =
+let md_to_html title md template =
   let doc = Cmarkit.Doc.of_string md in
   let html_template = Scanf.format_from_string template "%a %a" in
   let r = Cmarkit_html.renderer ~safe:true () in
@@ -69,7 +69,21 @@ let md_to_html (title:string) (md:string) (template:string) : string =
   Printf.kbprintf Buffer.contents (Buffer.create 1024)
     html_template buffer_add_title title buffer_add_doc doc
 
-let process (pages: page list) (template_path: string) =
+let reroute src dest =
+  let src_list = List.tl_exn (Filename.parts (Filename.dirname src)) in
+  let dest_list = List.tl_exn (Filename.parts dest) in
+  String.concat ~sep:"/" ((List.map ~f:(fun _ -> "..") src_list) @ dest_list)
+
+let rebind_links_from page pages template =
+  let link_regex = Re.Perl.re "href=\"((\\w+\\.?)*)\"" |> Re.compile in
+  Re.replace link_regex ~f:(fun groups ->
+    let link_in_template = Re.Pcre.get_substring groups 1 in
+    match (List.find pages ~f:(fun p -> String.equal (Filename.basename p.relative_path) (Filename.basename link_in_template))) with
+    | Some x -> String.concat ["href=\""; (reroute page.relative_path x.relative_path); "\""]
+    | None -> Re.Pcre.get_substring groups 0) template
+
+
+let process pages template_path =
   let template = In_channel.with_file template_path ~f:(fun ic ->
             In_channel.input_all ic) in
   List.map pages
@@ -77,8 +91,11 @@ let process (pages: page list) (template_path: string) =
         let page_contents = In_channel.with_file page.input_path ~f:(fun ic ->
             In_channel.input_all ic) in
         match page.page_type with
-        | Markdown -> Out_channel.write_all page.output_path ~data:(md_to_html page.title page_contents template)
+        | Markdown ->
+          Out_channel.write_all page.output_path ~data:(md_to_html page.title page_contents (rebind_links_from page pages template))
         | _ -> Out_channel.write_all page.output_path ~data:page_contents)
 
 let transmute template input_dir exclude output_dir =
-  ignore (process (pages input_dir output_dir (traverse input_dir exclude output_dir)) template)
+  let site = pages input_dir output_dir (traverse input_dir exclude output_dir) in
+  ignore (List.map site ~f:(fun page -> print_endline (string_of_page page)));
+  ignore (process site template)
