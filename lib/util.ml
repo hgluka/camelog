@@ -53,14 +53,19 @@ let regular_file = fun filename ->
   | `No -> failwith "Not a regular file"
   | `Unknown -> failwith "Could not determine if file is regular"
 
+let interpolated template title content posts =
+  let templater = Re.Pcre.re "\\[(title|content|posts)\\]" |> Re.compile in
+  Re.replace templater ~all:true ~f:(fun groups ->
+    match Re.Pcre.get_substring groups 1 with
+    | "title" -> title
+    | "content" -> content
+    | "posts" -> posts
+    | _ -> "") template
+
 let md_to_html title md template =
-  let doc = Cmarkit.Doc.of_string md in
-  let html_template = Scanf.format_from_string template "%a %a" in
   let r = Cmarkit_html.renderer ~safe:true () in
-  let buffer_add_doc = Cmarkit_renderer.buffer_add_doc r in
-  let buffer_add_title = Cmarkit_html.buffer_add_html_escaped_string in
-  Printf.kbprintf Buffer.contents (Buffer.create 1024)
-    html_template buffer_add_title title buffer_add_doc doc
+  let content = Cmarkit_renderer.doc_to_string r (Cmarkit.Doc.of_string md) in
+  interpolated template title content "<p>POSTS!!!!!</p>"
 
 let reroute src dest =
   let src_list = List.tl_exn (Filename.parts (Filename.dirname src)) in
