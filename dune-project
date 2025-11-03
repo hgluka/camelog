@@ -22,6 +22,7 @@
    ocaml
    core
    ppx_jane
+   ppx_deriving
    fileutils
    cmarkit
    re))

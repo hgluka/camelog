@@ -2,4 +2,4 @@
  (public_name camelog)
  (name main)
  (libraries util core core_unix.command_unix)
- (preprocess (pps ppx_jane)))
+ (preprocess (pps ppx_jane ppx_deriving.show)))

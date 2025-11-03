@@ -4,6 +4,7 @@ type page_type =
   | Markdown
   | Css
   | Other
+  [@@deriving show]
 
 type page = {
   page_type: page_type;
@@ -11,15 +12,7 @@ type page = {
   relative_path: string;
   input_path: string;
   output_path: string
-}
-
-let string_of_ptype pt = match pt with
-  | Markdown -> "Markdown"
-  | Css -> "Css"
-  | Other -> "Other"
-
-let string_of_page p =
-  String.concat ["page: { title = \""; p.title; "\", relative_path = "; p.relative_path; ", type = "; string_of_ptype p.page_type; " }"]
+} [@@deriving show]
 
 let pages input_dir output_dir paths =
   List.map paths
@@ -97,5 +90,5 @@ let process pages template_path =
 
 let transmute template input_dir exclude output_dir =
   let site = pages input_dir output_dir (traverse input_dir exclude output_dir) in
-  ignore (List.map site ~f:(fun page -> print_endline (string_of_page page)));
+  ignore (List.map site ~f:(fun page -> print_endline (show_page page)));
   ignore (process site template)
