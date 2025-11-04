@@ -30,7 +30,10 @@ let pages input_dir output_dir paths =
         {
           page_type = ptype;
           title = FilePath.basename cut_path;
-          relative_path = FilePath.add_extension cut_path new_ext;
+          relative_path = String.sub (FilePath.add_extension cut_path new_ext) ~pos:1 ~len:(String.length (FilePath.add_extension cut_path new_ext) - 1);
           input_path = path;
           output_path = Filename.concat output_dir (FilePath.add_extension cut_path new_ext)
         })
+
+let list_of_posts pages filter =
+  String.concat ["<ul>\n    <li>"; String.concat ~sep:"</li>\n    <li>" (List.filter_map pages ~f:(fun p -> if filter p then Some (String.concat ["<a href=\""; p.relative_path; "\">"; p.title; "</a>"]) else None)); "</li>\n  </ul>"]
