@@ -1,4 +1,11 @@
 open Core
+open Util.Files
+open Util.Pages
+
+let transmute template input_dir exclude output_dir =
+  let site = pages input_dir output_dir (traverse input_dir exclude output_dir) in
+  ignore (List.map site ~f:(fun page -> print_endline (show_page page)));
+  ignore (process site template)
 
 let command =
   Command.basic
@@ -12,6 +19,6 @@ let command =
       and output_dir =
         anon ("output_dir" %: string)
      in
-     fun () -> Util.transmute template input_dir (fun _s -> false) output_dir)
+     fun () -> transmute template input_dir (fun _s -> false) output_dir)
 
 let () = Command_unix.run ~version:"1.0" command
