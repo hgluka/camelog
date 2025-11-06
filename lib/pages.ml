@@ -1,7 +1,7 @@
 open Core
 
 type page_type =
-  | Markdown
+  | Markdown of string
   | Css
   | Other
   [@@deriving show]
@@ -18,8 +18,9 @@ let pages input_dir output_dir paths =
   List.map paths
     ~f:(fun path ->
         let path_and_ext = Filename.split_extension path in
+        let template_file = Filename.concat (Filename.dirname path) "mould.html" in
         let ptype = match snd path_and_ext with
-          | Some "md" -> Markdown
+          | Some "md" -> Markdown template_file
           | Some "css" -> Css
           | _ -> Other in
         let new_ext = match snd path_and_ext with
