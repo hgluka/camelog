@@ -14,11 +14,11 @@ type page = {
   output_path: string
 } [@@deriving show]
 
-let pages input_dir output_dir paths =
+let pages input_dir output_dir template paths =
   List.map paths
     ~f:(fun path ->
         let path_and_ext = Filename.split_extension path in
-        let template_file = Filename.concat (Filename.dirname path) "mould.html" in
+        let template_file = Filename.concat (Filename.dirname path) template in
         let ptype = match snd path_and_ext with
           | Some "md" -> Markdown template_file
           | Some "css" -> Css
