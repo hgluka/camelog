@@ -52,7 +52,7 @@ let test_regular_file_fail () =
 
 let test_traverse () =
   Alcotest.(check (list string)) "same directory content list"
-    directory_contents (Util.Files.traverse "test_website" (fun _ -> false) (fun _ -> ()))
+    directory_contents (List.sort (Util.Files.traverse "test_website" (fun _ -> false) (fun _ -> ())) ~compare:String.descending)
 
 (* Util.Templates tests *)
 let test_reroute () =
@@ -64,11 +64,15 @@ let test_interpolate () =
 
 (* Util.Pages tests *)
 let test_pages () =
-  Alcotest.(check (list testable_page)) "same page list" page_list (Util.Pages.pages "test_website" "output_dir" "template.html" directory_contents)
+  Alcotest.(check (list testable_page)) "same page list"
+    page_list
+    (List.sort
+       (Util.Pages.pages "test_website" "output_dir" "template.html" directory_contents)
+       ~compare:(fun p q -> String.descending p.relative_path q.relative_path))
 
 let test_post_list () =
   Alcotest.(check string) "same string" post_list (Util.Pages.list_of_posts page_list
-                                                  (fun f -> List.mem (Filename.parts f.relative_path) "posts" ~equal:String.equal))
+                                                     (fun f -> List.mem (Filename.parts f.relative_path) "posts" ~equal:String.equal))
 
 let () =
   let open Alcotest in
