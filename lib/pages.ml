@@ -4,7 +4,7 @@ type page_type =
   | Markdown of string
   | Css
   | Other
-  [@@deriving show]
+  [@@deriving show, eq]
 
 type page = {
   page_type: page_type;
@@ -13,7 +13,7 @@ type page = {
   relative_path: string;
   input_path: string;
   output_path: string
-} [@@deriving show]
+} [@@deriving show, eq]
 
 let is_markdown pt =
   match pt with
