@@ -16,6 +16,7 @@ depends: [
   "fileutils"
   "cmarkit"
   "re"
+  "alcotest" {with-test}
   "odoc" {with-doc}
 ]
 build: [

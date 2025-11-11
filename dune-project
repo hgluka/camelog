@@ -25,6 +25,7 @@
    ppx_deriving
    fileutils
    cmarkit
-   re))
+   re
+   (alcotest :with-test)))
 
 ; See the complete stanza docs at https://dune.readthedocs.io/en/stable/reference/dune-project/index.html

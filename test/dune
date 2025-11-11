@@ -1,2 +1,4 @@
 (test
- (name test_camelog))
+ (name test)
+ (libraries alcotest util)
+ (deps (glob_files_rec "test_website/*")))
