@@ -11,7 +11,7 @@ let interpolated template title content posts =
     | _ -> "") template
 
 let md_to_html title md template posts =
-  let r = Cmarkit_html.renderer ~safe:true () in
+  let r = Cmarkit_html.renderer ~safe:false () in
   let content = Cmarkit_renderer.doc_to_string r (Cmarkit.Doc.of_string ~strict:false md) in
   interpolated template title content posts
 

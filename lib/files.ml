@@ -2,9 +2,10 @@ open Core
 open Pages
 open Templates
 
-let create_dir output_dir p =
+let create_dir input_dir output_dir p =
+  let input_dir_re = Re.str input_dir |> Re.compile in
   (if not (String.is_empty output_dir)
-   then (FileUtil.mkdir ~parent:true ~mode:(`Octal 0o755) (Filename.concat output_dir p)))
+   then (FileUtil.mkdir ~parent:true ~mode:(`Octal 0o755) (Re.replace_string ~all:false input_dir_re ~by:output_dir p)))
 
 let rec traverse input_dir exclude apply_to_dir =
   let flat_contents = Sys_unix.ls_dir input_dir in
@@ -12,7 +13,7 @@ let rec traverse input_dir exclude apply_to_dir =
       ~f:(fun p ->
         let full_path = Filename.concat input_dir p in
         match Sys_unix.is_directory full_path with
-        | `Yes -> apply_to_dir p; traverse full_path exclude apply_to_dir
+        | `Yes -> apply_to_dir full_path; traverse full_path exclude apply_to_dir
         | _ -> [full_path])
       in
   List.concat contents
