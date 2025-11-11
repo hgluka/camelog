@@ -21,6 +21,7 @@
  (depends
    ocaml
    core
+   core_unix
    ppx_jane
    ppx_deriving
    fileutils
