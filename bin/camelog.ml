@@ -22,4 +22,4 @@ Links: seek:/path/from/input_dir or seek:unique-file-name|})
        try Camelog.Build.run ~verbose input_dir output_dir with
        | Failure msg | Sys_error msg -> eprintf "camelog: %s\n" msg; Stdlib.exit 1)
 
-let () = Command_unix.run ~version:"1.0" command
+let () = Command_unix.run ~version:"1.1" command

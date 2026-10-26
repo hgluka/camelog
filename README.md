@@ -2,6 +2,17 @@
 
 A static blog generator written in OCaml. It turns a directory of markdown files and HTML templates into a static site.
 
+## Installing
+
+Every push to `main` that passes the tests publishes a Linux x86_64 binary as the `latest` release:
+
+```
+curl -fL -o camelog https://github.com/hgluka/camelog/releases/download/latest/camelog-linux-x86_64
+chmod +x camelog
+```
+
+It needs the Oniguruma library at run time (`libonig5` on Debian and Ubuntu). Sites with math also need pandoc, and sites with TikZ figures need `latex` and `dvisvgm`. To build from source instead, see [Building](#building).
+
 ## Usage
 
 ```
