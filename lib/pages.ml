@@ -53,9 +53,14 @@ let pretty_page_title page =
   | Some d -> String.concat [d; ": "; page.title]
   | None -> page.title
 
+let compare_posts p q =
+  match Option.compare String.compare q.date p.date with
+  | 0 -> String.compare q.relative_path p.relative_path
+  | c -> c
+
 let list_of_posts pages filter =
   String.concat ["<ul>\n    <li>"; String.concat ~sep:"</li>\n    <li>"
-                   (List.filter_map pages ~f:(fun p -> if filter p
+                   (List.filter_map (List.sort pages ~compare:compare_posts) ~f:(fun p -> if filter p
                                                then Some (String.concat ["<a href=\""; p.relative_path; "\">"; pretty_page_title p; "</a>"])
                                                else None));
                  "</li>\n  </ul>"]

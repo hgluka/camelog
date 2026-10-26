@@ -38,9 +38,9 @@ let page_list : Util.Pages.page list =
      output_path = "output_dir/index.html" }]
 
 let post_list = {|<ul>
-    <li><a href="posts/template.html">template</a></li>
     <li><a href="posts/2025-11-11-post-two.html">2025-11-11: Post Two</a></li>
     <li><a href="posts/2025-11-11-post-one.html">2025-11-11: Post One</a></li>
+    <li><a href="posts/template.html">template</a></li>
   </ul>|}
 
 (* Util.Files tests *)
