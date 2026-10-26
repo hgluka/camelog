@@ -1,8 +1,10 @@
 (** Build-time syntax highlighting of markdown code blocks. *)
 
 (** [grammars dir] is hilite's built-in grammars (OCaml, dune, opam, shell, diff)
-    plus every [.json] TextMate grammar in [dir], if it exists. Fails on a
-    grammar that doesn't parse. *)
+    plus every [.json] TextMate grammar in [dir], if it exists. Two shapes
+    that VS Code accepts are tolerated: repository entries written as a list
+    of rules are read as [{"patterns": [...]}], and capture entries that
+    aren't objects are ignored. Fails on a grammar that doesn't parse. *)
 val grammars : string -> TmLanguage.t
 
 (** Highlights code blocks whose language matches a grammar's name, or else one
