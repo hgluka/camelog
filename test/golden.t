@@ -238,3 +238,14 @@ A figure LaTeX can't compile stops the build with LaTeX's error lines.
   ! Undefined control sequence.
   l.6 \begin{tikzpicture}\nosuchmacro
   [1]
+
+seek: finds files with spaces and non-ASCII letters in their names, even
+after cmarkit percent-encodes the markdown link.
+
+  $ mkdir -p names/posts names/images
+  $ printf 'inscribe:content' > names/posts/_template.html
+  $ printf 'x' > 'names/images/my čvor.png'
+  $ printf '![node](<seek:my čvor.png>)\n' > names/posts/node.md
+  $ camelog names names_out
+  $ grep -o 'src="[^"]*"' names_out/posts/node.html
+  src="../images/my%20%C4%8Dvor.png"

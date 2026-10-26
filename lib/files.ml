@@ -1,6 +1,8 @@
 open Core
-open Pages
-open Templates
+
+let relative_to input_dir path =
+  String.chop_prefix_if_exists path ~prefix:input_dir
+  |> String.chop_prefix_if_exists ~prefix:"/"
 
 let create_dir input_dir output_dir p =
   (if not (String.is_empty output_dir)
@@ -24,20 +26,3 @@ let regular_file = fun filename ->
   | `Yes -> filename
   | `No -> failwithf "%s is not a regular file" filename ()
   | `Unknown -> failwithf "could not determine if %s is a regular file" filename ()
-
-let process ~tm ~preamble pages =
-  let posts = list_of_posts pages is_post in
-  List.iter pages
-    ~f:(fun page ->
-        match page.page_type with
-        | Markdown template_path ->
-          let page_contents = In_channel.read_all page.input_path in
-          let template = In_channel.read_all (regular_file template_path) in
-          let content =
-            try render tm preamble page_contents with
-            | Failure msg -> failwithf "%s: %s" page.input_path msg () in
-          let html =
-            try interpolated template (escape_html page.title) content posts with
-            | Failure msg -> failwithf "%s: %s" template_path msg () in
-          Out_channel.write_all page.output_path ~data:(rebind_links_from page pages html)
-        | Other -> FileUtil.cp [page.input_path] page.output_path)

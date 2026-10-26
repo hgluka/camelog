@@ -19,10 +19,6 @@ let is_markdown pt =
   | Markdown _ -> true
   | _ -> false
 
-let relative_to input_dir path =
-  String.chop_prefix_if_exists path ~prefix:input_dir
-  |> String.chop_prefix_if_exists ~prefix:"/"
-
 let date_re = Re.Pcre.re "\\d{4}-\\d{2}-\\d{2}" |> Re.compile
 
 let pages input_dir output_dir paths =
@@ -37,7 +33,7 @@ let pages input_dir output_dir paths =
           | Some "md" -> "html"
           | Some x -> x
           | None -> "" in
-        let cut_path = relative_to input_dir (fst path_and_ext) in
+        let cut_path = Files.relative_to input_dir (fst path_and_ext) in
         let relative_path = FilePath.add_extension cut_path new_ext in
         let heading = match ptype with
           | Markdown _ -> List.find (In_channel.read_lines path) ~f:(String.is_prefix ~prefix:"##")
@@ -61,24 +57,7 @@ let is_post page =
   | "." :: "posts" :: _ -> true
   | _ -> false
 
-let escape_html s =
-  let buf = Buffer.create (String.length s) in
-  Cmarkit_html.buffer_add_html_escaped_string buf s;
-  Buffer.contents buf
-
-let pretty_page_title page =
-  match page.date with
-  | Some d -> String.concat [d; ": "; page.title]
-  | None -> page.title
-
 let compare_posts p q =
   match Option.compare String.compare q.date p.date with
   | 0 -> String.compare q.relative_path p.relative_path
   | c -> c
-
-let list_of_posts pages filter =
-  String.concat ["<ul>\n    <li>"; String.concat ~sep:"</li>\n    <li>"
-                   (List.filter_map (List.sort pages ~compare:compare_posts) ~f:(fun p -> if filter p
-                                               then Some (String.concat ["<a href=\"seek:/"; p.relative_path; "\">"; escape_html (pretty_page_title p); "</a>"])
-                                               else None));
-                 "</li>\n  </ul>"]

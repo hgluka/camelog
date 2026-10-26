@@ -1,4 +1,4 @@
-(** Pages of the site and the post list. *)
+(** The pages of the site. *)
 
 type page_type =
   | Markdown of string  (** Markdown source, rendered with the template at this path *)
@@ -14,9 +14,6 @@ type page = {
   output_path: string
 } [@@deriving sexp_of, equal]
 
-(** [relative_to input_dir path] is [path] without the [input_dir] prefix and leading [/]. *)
-val relative_to : string -> string -> string
-
 (** [pages input_dir output_dir paths] describes each file in [paths].
     Markdown files use the [_template.html] in their own directory. *)
 val pages : string -> string -> string list -> page list
@@ -24,9 +21,5 @@ val pages : string -> string -> string list -> page list
 (** A markdown page under [posts/]. *)
 val is_post : page -> bool
 
-(** Escapes [&], [<], [>] and double quotes for HTML. *)
-val escape_html : string -> string
-
-(** [list_of_posts pages filter] is an HTML list of [seek:] links to the pages
-    that pass [filter], newest first. *)
-val list_of_posts : page list -> (page -> bool) -> string
+(** Orders posts newest first, undated pages last. *)
+val compare_posts : page -> page -> int

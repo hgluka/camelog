@@ -1,15 +1,4 @@
 open Core
-open Camelog.Files
-open Camelog.Pages
-
-let transmute ~verbose input_dir output_dir =
-  let input_dir = String.rstrip input_dir ~drop:(Char.equal '/') in
-  let tm = Camelog.Highlight.grammars (Filename.concat input_dir "_grammars") in
-  let preamble = Camelog.Tikz.preamble (Filename.concat input_dir "_tikz.tex") in
-  create_dir input_dir output_dir input_dir;
-  let site = pages input_dir output_dir (traverse input_dir unpublished (create_dir input_dir output_dir)) in
-  if verbose then List.iter site ~f:(fun page -> print_s (sexp_of_page page));
-  process ~tm ~preamble site
 
 let command =
   Command.basic
@@ -30,7 +19,7 @@ Links: seek:/path/from/input_dir or seek:unique-file-name|})
         flag "-verbose" no_arg ~doc:" print every page before building the site"
      in
      fun () ->
-       try transmute ~verbose input_dir output_dir with
+       try Camelog.Build.run ~verbose input_dir output_dir with
        | Failure msg | Sys_error msg -> eprintf "camelog: %s\n" msg; Stdlib.exit 1)
 
 let () = Command_unix.run ~version:"1.0" command

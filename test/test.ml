@@ -66,21 +66,21 @@ let test_unpublished () =
   Alcotest.(check (list bool)) "same flags" [true; true; true; false; false]
     (List.map ~f:Camelog.Files.unpublished ["_template.html"; "_drafts"; "posts/_notes.md"; "posts"; "my_post.md"])
 
-(* Camelog.Templates tests *)
+(* Camelog.Links tests *)
 let test_reroute () =
-  Alcotest.(check string) "same filename" "../index.md" (Camelog.Templates.reroute "posts/2025-11-11-post-one.md" "index.md")
+  Alcotest.(check string) "same filename" "../index.md" (Camelog.Links.reroute "posts/2025-11-11-post-one.md" "index.md")
 
 let test_reroute_same_dir () =
   Alcotest.(check string) "same filename" "2025-11-11-post-two.html"
-    (Camelog.Templates.reroute "posts/2025-11-11-post-one.html" "posts/2025-11-11-post-two.html")
+    (Camelog.Links.reroute "posts/2025-11-11-post-one.html" "posts/2025-11-11-post-two.html")
 
 let test_reroute_subdir () =
   Alcotest.(check string) "same filename" "posts/2025-11-11-post-two.html"
-    (Camelog.Templates.reroute "index.html" "posts/2025-11-11-post-two.html")
+    (Camelog.Links.reroute "index.html" "posts/2025-11-11-post-two.html")
 
 let post_one = List.find_exn page_list ~f:(fun p -> String.equal p.relative_path "posts/2025-11-11-post-one.html")
 
-let rebind template = Camelog.Templates.rebind_links_from post_one page_list template
+let rebind template = Camelog.Links.rebind_links_from post_one page_list template
 
 let test_seek_path () =
   Alcotest.(check string) "same string" {|<a href="../index.html">|} (rebind {|<a href="seek:/index.md">|})
@@ -102,13 +102,19 @@ let test_seek_ambiguous () =
     (Failure "test_website/posts/2025-11-11-post-one.md: seek:styles.css matches several files: styles.css, posts/styles.css")
     (fun () ->
        let second_styles = { (List.hd_exn page_list) with relative_path = "posts/styles.css" } in
-       ignore (Camelog.Templates.rebind_links_from post_one (page_list @ [second_styles]) {|<link href="seek:styles.css">|}))
+       ignore (Camelog.Links.rebind_links_from post_one (page_list @ [second_styles]) {|<link href="seek:styles.css">|}))
 
 let test_seek_relative_path () =
   Alcotest.check_raises "same failure"
     (Failure "test_website/posts/2025-11-11-post-one.md: seek:posts/x.md must be an exact path starting with / or a file name without /")
     (fun () -> ignore (rebind {|<a href="seek:posts/x.md">|}))
 
+let test_seek_encoded () =
+  let extra = { (List.hd_exn page_list) with relative_path = "images/my čvor.png" } in
+  Alcotest.(check string) "same string" {|<img src="../images/my%20%C4%8Dvor.png">|}
+    (Camelog.Links.rebind_links_from post_one (page_list @ [extra]) {|<img src="seek:my%20%C4%8Dvor.png">|})
+
+(* Camelog.Templates tests *)
 let test_interpolate () =
   Alcotest.(check string) "same string" "test TEST_TITLE; TEST_CONTENT; TEST_POSTS; abbr[title]"
     (Camelog.Templates.interpolated "test inscribe:title; inscribe:content; inscribe:posts; abbr[title]" "TEST_TITLE" "TEST_CONTENT" "TEST_POSTS")
@@ -117,6 +123,9 @@ let test_interpolate_unknown () =
   Alcotest.check_raises "same failure"
     (Failure "inscribe:contnet is not a placeholder, use inscribe:title, inscribe:content or inscribe:posts")
     (fun () -> ignore (Camelog.Templates.interpolated "inscribe:contnet" "" "" ""))
+
+let test_post_list () =
+  Alcotest.(check string) "same string" post_list (Camelog.Templates.list_of_posts page_list Camelog.Pages.is_post)
 
 (* Camelog.Pages tests *)
 let check_pages input_dir =
@@ -130,9 +139,6 @@ let test_pages () = check_pages "test_website"
 
 let test_pages_trailing_slash () = check_pages "test_website/"
 
-let test_post_list () =
-  Alcotest.(check string) "same string" post_list (Camelog.Pages.list_of_posts page_list Camelog.Pages.is_post)
-
 let () =
   let open Alcotest in
   run "Camelog" [
@@ -142,7 +148,7 @@ let () =
       test_case "Directory traversal test" `Quick test_traverse;
       test_case "Unpublished names test" `Quick test_unpublished;
     ];
-    "Camelog.Templates", [
+    "Camelog.Links", [
       test_case "Reroute test" `Quick test_reroute;
       test_case "Reroute same directory test" `Quick test_reroute_same_dir;
       test_case "Reroute subdirectory test" `Quick test_reroute_subdir;
@@ -152,12 +158,15 @@ let () =
       test_case "Seek missing file test" `Quick test_seek_missing;
       test_case "Seek ambiguous name test" `Quick test_seek_ambiguous;
       test_case "Seek relative path test" `Quick test_seek_relative_path;
+      test_case "Seek percent-encoded name test" `Quick test_seek_encoded;
+    ];
+    "Camelog.Templates", [
       test_case "Interpolation test" `Quick test_interpolate;
       test_case "Interpolation unknown placeholder test" `Quick test_interpolate_unknown;
+      test_case "Post list test" `Quick test_post_list;
     ];
     "Camelog.Pages", [
       test_case "Pages test" `Quick test_pages;
       test_case "Pages trailing slash test" `Quick test_pages_trailing_slash;
-      test_case "Post list test" `Quick test_post_list;
     ]
   ]
