@@ -10,5 +10,6 @@ val traverse : string -> (string -> bool) -> (string -> unit) -> string list
 (** Returns the path if it is a regular file, fails otherwise. *)
 val regular_file : string -> string
 
-(** Renders markdown pages into their templates and copies everything else. *)
-val process : Pages.page list -> unit
+(** Renders markdown pages into their templates, highlighting code with [tm],
+    and copies everything else. *)
+val process : tm:TmLanguage.t -> Pages.page list -> unit

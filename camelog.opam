@@ -16,6 +16,9 @@ depends: [
   "fileutils"
   "cmarkit"
   "re"
+  "hilite"
+  "textmate-language"
+  "yojson"
   "alcotest" {with-test}
   "odoc" {with-doc}
 ]

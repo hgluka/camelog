@@ -23,7 +23,7 @@ let regular_file = fun filename ->
   | `No -> failwithf "%s is not a regular file" filename ()
   | `Unknown -> failwithf "could not determine if %s is a regular file" filename ()
 
-let process pages =
+let process ~tm pages =
   let posts = list_of_posts pages is_post in
   List.iter pages
     ~f:(fun page ->
@@ -32,7 +32,7 @@ let process pages =
           let page_contents = In_channel.read_all page.input_path in
           let template = In_channel.read_all (regular_file template_path) in
           let html =
-            try md_to_html (escape_html page.title) page_contents template posts with
+            try md_to_html tm (escape_html page.title) page_contents template posts with
             | Failure msg -> failwithf "%s: %s" template_path msg () in
           Out_channel.write_all page.output_path ~data:(rebind_links_from page pages html)
         | Other -> FileUtil.cp [page.input_path] page.output_path)

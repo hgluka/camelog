@@ -1,0 +1,10 @@
+{
+  "name": "toy",
+  "scopeName": "source.toy",
+  "fileTypes": ["ty"],
+  "patterns": [
+    { "match": "\\b(let|in)\\b", "name": "keyword.control.toy" },
+    { "match": "\"[^\"]*\"", "name": "string.quoted.double.toy" },
+    { "match": "--.*$", "name": "comment.line.toy" }
+  ]
+}

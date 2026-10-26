@@ -5,8 +5,9 @@
     [inscribe:] name. *)
 val interpolated : string -> string -> string -> string -> string
 
-(** [md_to_html title md template posts] renders [md] and fills [template] with it. *)
-val md_to_html : string -> string -> string -> string -> string
+(** [md_to_html tm title md template posts] renders [md], highlighting code blocks
+    with the grammars in [tm], and fills [template] with it. *)
+val md_to_html : TmLanguage.t -> string -> string -> string -> string -> string
 
 (** [reroute src dest] is the relative link from page [src] to [dest]. *)
 val reroute : string -> string -> string

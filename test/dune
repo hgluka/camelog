@@ -4,4 +4,4 @@
  (deps (glob_files_rec "test_website/*")))
 
 (cram
- (deps %{bin:camelog} (glob_files_rec "test_website/*")))
+ (deps %{bin:camelog} (glob_files_rec "test_website/*") (glob_files_rec "grammars/*")))

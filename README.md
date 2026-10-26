@@ -5,7 +5,7 @@ A static blog generator written in OCaml. It turns a directory of markdown files
 ## Usage
 
 ```
-camelog INPUT_DIR TEMPLATE OUTPUT_DIR [-verbose]
+camelog INPUT_DIR TEMPLATE OUTPUT_DIR [-grammars DIR] [-verbose]
 ```
 
 `TEMPLATE` is a file name, not a path. Every directory that contains markdown files needs a template with that name. camelog renders each `.md` file into `OUTPUT_DIR` as `.html` and copies every other file as is. `-verbose` prints each page before building.
@@ -56,7 +56,24 @@ See [the previous post](seek:2020-03-29-prijavite-se-za-plmw.md).
 
 The build stops with an error if a `seek:` link matches no file or more than one, or if it contains a `/` without starting with one.
 
+## Code highlighting
+
+Fenced code blocks are highlighted at build time with [hilite](https://github.com/patricoferris/hilite) and TextMate grammars, the format VS Code uses. No JavaScript is needed on the page.
+
+hilite includes grammars for OCaml, dune, opam, shell and diff. For other languages, put TextMate grammar `.json` files in a directory outside `INPUT_DIR` and pass it with `-grammars DIR`. [Shiki's grammar collection](https://github.com/shikijs/textmate-grammars-themes/tree/main/packages/tm-grammars) is a good source; keep each grammar's license next to it.
+
+A block's language is matched against each grammar's `name`, then its `fileTypes`, so ```` ```racket ```` and ```` ```rkt ```` can both find a Racket grammar. Blocks in other languages are rendered as plain code.
+
+Each token becomes a `<span>` whose class is the block's language followed by the token's TextMate scope, like `racket-keyword-control` or `ocaml-string-quoted-double`. A stylesheet can match scopes for every language at once:
+
+```css
+pre code [class*="-comment"] { color: #928374; }
+pre code [class*="-keyword"] { color: #fb4934; }
+```
+
 ## Building
+
+camelog needs the Oniguruma C library and its headers (`oniguruma-devel` on Void, `libonig-dev` on Debian and Ubuntu).
 
 ```
 dune build

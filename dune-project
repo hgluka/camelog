@@ -26,6 +26,9 @@
    fileutils
    cmarkit
    re
+   hilite
+   textmate-language
+   yojson
    (alcotest :with-test)))
 
 ; See the complete stanza docs at https://dune.readthedocs.io/en/stable/reference/dune-project/index.html

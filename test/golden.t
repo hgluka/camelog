@@ -1,6 +1,6 @@
 Build the test website and check the generated files.
 
-  $ camelog test_website template.html out > /dev/null
+  $ camelog -grammars grammars test_website template.html out > /dev/null
   $ find out -type f | sort
   out/index.html
   out/posts/2025-11-11-post-one.html
@@ -33,6 +33,35 @@ Build the test website and check the generated files.
       <li><a href="posts/2025-11-12-post-three.html">2025-11-12: Post Three &amp; &lt;Friends&gt;</a></li>
       <li><a href="posts/2025-11-11-post-two.html">2025-11-11: Post Two</a></li>
       <li><a href="posts/2025-11-11-post-one.html">2025-11-11: Post One</a></li>
+    </ul>
+  </body>
+  </html>
+  $ cat out/posts/2025-11-11-post-two.html
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../styles.css">
+    <title>Post Two</title>
+  </head>
+  <body>
+    <a href="../index.html">index.md</a>
+    <a href="https://example.com/docs/index.html">docs</a>
+    <h2>Post Two</h2>
+  <pre><code><span class='ocaml-keyword'>let</span><span class='ocaml-source'> </span><span class='ocaml-entity-name-function-binding'>x</span><span class='ocaml-source'> </span><span class='ocaml-keyword-operator'>=</span><span class='ocaml-source'> </span><span class='ocaml-constant-numeric-decimal-integer'>1</span><span class='ocaml-source'>
+  </span></code></pre>
+  <pre><code><span class='toy-keyword-control'>let</span><span class='toy-source'> greeting = </span><span class='toy-string-quoted-double'>&quot;hi&quot;</span><span class='toy-source'> </span><span class='toy-keyword-control'>in</span><span class='toy-source'> greeting </span><span class='toy-comment-line'>-- from -grammars</span><span class='toy-source'>
+  </span></code></pre>
+  <pre><code><span class='ty-keyword-control'>let</span><span class='ty-source'> x = </span><span class='ty-string-quoted-double'>&quot;found by file type&quot;</span><span class='ty-source'>
+  </span></code></pre>
+  <pre><code class="language-nosuchlang">plain &lt;code&gt; with href=&quot;seek:styles.css&quot; stays as is
+  </code></pre>
+  
+    <ul>
+      <li><a href="2025-11-12-post-three.html">2025-11-12: Post Three &amp; &lt;Friends&gt;</a></li>
+      <li><a href="2025-11-11-post-two.html">2025-11-11: Post Two</a></li>
+      <li><a href="2025-11-11-post-one.html">2025-11-11: Post One</a></li>
     </ul>
   </body>
   </html>
@@ -86,7 +115,7 @@ Build the test website and check the generated files.
 
 A trailing slash on the input directory gives the same output.
 
-  $ camelog test_website/ template.html out2 > /dev/null
+  $ camelog -grammars grammars test_website/ template.html out2 > /dev/null
   $ diff -r out out2
 
 A seek: link that matches no file stops the build.
@@ -122,4 +151,13 @@ An unknown inscribe: placeholder stops the build and names the template.
   $ printf '## Typo\n' > typo/index.md
   $ camelog typo template.html typo_out
   camelog: typo/template.html: inscribe:contnet is not a placeholder, use inscribe:title, inscribe:content or inscribe:posts
+  [1]
+
+A grammar that doesn't parse stops the build.
+
+  $ mkdir bad_grammars
+  $ printf '{' > bad_grammars/broken.json
+  $ camelog -grammars bad_grammars test_website template.html bad_out
+  camelog: bad_grammars/broken.json: Line 1, bytes 0-1:
+  Unexpected end of input
   [1]
