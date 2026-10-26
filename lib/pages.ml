@@ -3,7 +3,7 @@ open Core
 type page_type =
   | Markdown of string
   | Other
-  [@@deriving show, eq]
+  [@@deriving sexp_of, equal]
 
 type page = {
   page_type: page_type;
@@ -12,7 +12,7 @@ type page = {
   relative_path: string;
   input_path: string;
   output_path: string
-} [@@deriving show, eq]
+} [@@deriving sexp_of, equal]
 
 let is_markdown pt =
   match pt with

@@ -1,6 +1,6 @@
 (library
- (name util)
- (public_name camelog.util)
+ (name camelog)
+ (public_name camelog)
  (modules files templates pages)
  (libraries core core_unix.sys_unix fileutils cmarkit re)
- (preprocess (pps ppx_jane ppx_deriving.show ppx_deriving.eq)))
+ (preprocess (pps ppx_jane)))

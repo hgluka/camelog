@@ -1,6 +1,6 @@
 (test
  (name test)
- (libraries alcotest util)
+ (libraries alcotest camelog)
  (deps (glob_files_rec "test_website/*")))
 
 (cram

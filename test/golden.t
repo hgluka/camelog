@@ -92,7 +92,7 @@ A trailing slash on the input directory gives the same output.
 A seek: link that matches no file stops the build.
 
   $ mkdir broken
-  $ printf '<link href="seek:missing.css">[content]' > broken/template.html
+  $ printf '<link href="seek:missing.css">inscribe:content' > broken/template.html
   $ printf '## Broken\n' > broken/index.md
   $ camelog broken template.html broken_out > /dev/null
   camelog: broken/index.md: seek:missing.css matches no file
@@ -109,8 +109,17 @@ A missing template names the file it looked for.
 A site without subdirectories still creates the output directory.
 
   $ mkdir flat
-  $ printf '[content]' > flat/template.html
+  $ printf 'inscribe:content' > flat/template.html
   $ printf '## Flat\n' > flat/index.md
   $ camelog flat template.html flat_out
   $ cat flat_out/index.html
   <h2>Flat</h2>
+
+An unknown inscribe: placeholder stops the build and names the template.
+
+  $ mkdir typo
+  $ printf 'inscribe:contnet' > typo/template.html
+  $ printf '## Typo\n' > typo/index.md
+  $ camelog typo template.html typo_out
+  camelog: typo/template.html: inscribe:contnet is not a placeholder, use inscribe:title, inscribe:content or inscribe:posts
+  [1]

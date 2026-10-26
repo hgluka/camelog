@@ -1,14 +1,15 @@
 open Core
 open Pages
 
+let templater = Re.Pcre.re "inscribe:([A-Za-z_]+)" |> Re.compile
+
 let interpolated template title content posts =
-  let templater = Re.Pcre.re "\\[(title|content|posts)\\]" |> Re.compile in
   Re.replace templater ~all:true ~f:(fun groups ->
     match Re.Pcre.get_substring groups 1 with
     | "title" -> title
     | "content" -> content
     | "posts" -> posts
-    | _ -> "") template
+    | name -> failwithf "inscribe:%s is not a placeholder, use inscribe:title, inscribe:content or inscribe:posts" name ()) template
 
 let md_to_html title md template posts =
   let r = Cmarkit_html.renderer ~safe:false () in
