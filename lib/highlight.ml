@@ -21,6 +21,7 @@ let rec normalize : TmLanguage.yojson -> TmLanguage.yojson = function
           match entry with
           | `Assoc _ -> Some (capture, normalize entry)
           | _ -> None))
+      | "filetypes", _ -> "fileTypes", value
       | _ -> key, normalize value))
   | `List items -> `List (List.map items ~f:normalize)
   | json -> json

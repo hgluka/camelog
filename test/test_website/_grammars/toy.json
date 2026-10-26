@@ -1,7 +1,7 @@
 {
   "name": "toy",
   "scopeName": "source.toy",
-  "fileTypes": ["ty"],
+  "filetypes": ["ty"],
   "patterns": [
     { "match": "\\b(let|in)\\b", "name": "keyword.control.toy" },
     { "include": "#strings" },
