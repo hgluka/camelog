@@ -3,9 +3,8 @@ open Pages
 open Templates
 
 let create_dir input_dir output_dir p =
-  let input_dir_re = Re.str input_dir |> Re.compile in
   (if not (String.is_empty output_dir)
-   then (FileUtil.mkdir ~parent:true ~mode:(`Octal 0o755) (Re.replace_string ~all:false input_dir_re ~by:output_dir p)))
+   then (FileUtil.mkdir ~parent:true ~mode:(`Octal 0o755) (Filename.concat output_dir (relative_to input_dir p))))
 
 let rec traverse input_dir exclude apply_to_dir =
   let flat_contents = Sys_unix.ls_dir input_dir in
@@ -21,18 +20,16 @@ let rec traverse input_dir exclude apply_to_dir =
 let regular_file = fun filename ->
   match Sys_unix.is_file filename with
   | `Yes -> filename
-  | `No -> failwith "Not a regular file"
-  | `Unknown -> failwith "Could not determine if file is regular"
+  | `No -> failwithf "%s is not a regular file" filename ()
+  | `Unknown -> failwithf "could not determine if %s is a regular file" filename ()
 
 let process pages =
-    let posts = list_of_posts pages is_post in
-  List.map pages
+  let posts = list_of_posts pages is_post in
+  List.iter pages
     ~f:(fun page ->
-        let page_contents = In_channel.with_file page.input_path ~f:(fun ic ->
-            In_channel.input_all ic) in
         match page.page_type with
         | Markdown template_path ->
-          let template = In_channel.with_file (regular_file template_path) ~f:(fun ic ->
-            In_channel.input_all ic) in
+          let page_contents = In_channel.read_all page.input_path in
+          let template = In_channel.read_all (regular_file template_path) in
           Out_channel.write_all page.output_path ~data:(rebind_links_from page pages (md_to_html (escape_html page.title) page_contents template posts))
-        | _ -> Out_channel.write_all page.output_path ~data:page_contents)
+        | Other -> FileUtil.cp [page.input_path] page.output_path)

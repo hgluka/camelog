@@ -97,3 +97,20 @@ A seek: link that matches no file stops the build.
   $ camelog broken template.html broken_out > /dev/null
   camelog: broken/index.md: seek:missing.css matches no file
   [1]
+
+A missing template names the file it looked for.
+
+  $ mkdir no_template
+  $ printf '## No template\n' > no_template/index.md
+  $ camelog no_template template.html no_template_out
+  camelog: no_template/template.html is not a regular file
+  [1]
+
+A site without subdirectories still creates the output directory.
+
+  $ mkdir flat
+  $ printf '[content]' > flat/template.html
+  $ printf '## Flat\n' > flat/index.md
+  $ camelog flat template.html flat_out
+  $ cat flat_out/index.html
+  <h2>Flat</h2>

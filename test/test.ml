@@ -18,7 +18,7 @@ let page_list : Util.Pages.page list =
      date = None; relative_path = "template.html";
      input_path = "test_website/template.html";
      output_path = "output_dir/template.html" };
-   { page_type = Util.Pages.Css; title = "styles";
+   { page_type = Util.Pages.Other; title = "styles";
      date = None; relative_path = "styles.css";
      input_path = "test_website/styles.css";
      output_path = "output_dir/styles.css" };
@@ -65,7 +65,7 @@ let test_regular_file_success () =
   Alcotest.(check string) "same filename" "test_website/index.md" (Util.Files.regular_file "test_website/index.md")
 
 let test_regular_file_fail () =
-  Alcotest.check_raises "same failure" (Failure "Not a regular file") (fun _ -> ignore (Util.Files.regular_file "missing.ml"))
+  Alcotest.check_raises "same failure" (Failure "missing.ml is not a regular file") (fun _ -> ignore (Util.Files.regular_file "missing.ml"))
 
 let test_traverse () =
   Alcotest.(check (list string)) "same directory content list"

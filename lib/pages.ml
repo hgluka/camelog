@@ -2,7 +2,6 @@ open Core
 
 type page_type =
   | Markdown of string
-  | Css
   | Other
   [@@deriving show, eq]
 
@@ -20,6 +19,12 @@ let is_markdown pt =
   | Markdown _ -> true
   | _ -> false
 
+let relative_to input_dir path =
+  String.chop_prefix_if_exists path ~prefix:input_dir
+  |> String.chop_prefix_if_exists ~prefix:"/"
+
+let date_re = Re.Pcre.re "\\d{4}-\\d{2}-\\d{2}" |> Re.compile
+
 let pages input_dir output_dir template paths =
   List.map paths
     ~f:(fun path ->
@@ -27,19 +32,19 @@ let pages input_dir output_dir template paths =
         let template_file = Filename.concat (Filename.dirname path) template in
         let ptype = match snd path_and_ext with
           | Some "md" -> Markdown template_file
-          | Some "css" -> Css
           | _ -> Other in
         let new_ext = match snd path_and_ext with
           | Some "md" -> "html"
           | Some x -> x
           | None -> "" in
-        let cut_path = String.chop_prefix_if_exists (fst path_and_ext) ~prefix:input_dir
-                       |> String.chop_prefix_if_exists ~prefix:"/" in
+        let cut_path = relative_to input_dir (fst path_and_ext) in
         let relative_path = FilePath.add_extension cut_path new_ext in
-        let post_title = match List.find (In_channel.read_lines path) ~f:(fun l -> is_markdown ptype && (Stdlib.String.starts_with ~prefix:"##" l)) with
+        let heading = match ptype with
+          | Markdown _ -> List.find (In_channel.read_lines path) ~f:(String.is_prefix ~prefix:"##")
+          | Other -> None in
+        let post_title = match heading with
           | Some l -> String.lstrip l ~drop:(Char.equal '#') |> String.strip
           | None -> Filename.basename cut_path in
-        let date_re = Re.Pcre.re "\\d{4}-\\d{2}-\\d{2}" |> Re.compile in
         let date_str_opt = Option.map ~f:(fun s -> Re.Pcre.get_substring s 0) (Re.exec_opt date_re (Filename.basename cut_path)) in
         {
           page_type = ptype;
