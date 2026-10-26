@@ -34,5 +34,5 @@ let process pages =
         | Markdown template_path ->
           let template = In_channel.with_file (regular_file template_path) ~f:(fun ic ->
             In_channel.input_all ic) in
-          Out_channel.write_all page.output_path ~data:(md_to_html (escape_html page.title) page_contents (rebind_links_from page pages template) (rebind_links_from page pages posts))
+          Out_channel.write_all page.output_path ~data:(rebind_links_from page pages (md_to_html (escape_html page.title) page_contents template posts))
         | _ -> Out_channel.write_all page.output_path ~data:page_contents)

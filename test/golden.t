@@ -70,6 +70,11 @@ Build the test website and check the generated files.
     <a href="../index.html">index.md</a>
     <a href="https://example.com/docs/index.html">docs</a>
     <h2>Post One</h2>
+  <p><a href="2025-11-11-post-two.html">Post two</a>, <a href="../index.html">home</a> and <img src="diagram.svg" alt="diagram" >.</p>
+  <img src="diagram.svg">
+  <p>A plain <a href="../index.html">relative link</a> stays as written.</p>
+  <pre><code class="language-html">&lt;a href=&quot;seek:styles.css&quot;&gt;code stays literal&lt;/a&gt;
+  </code></pre>
   
     <ul>
       <li><a href="2025-11-12-post-three.html">2025-11-12: Post Three &amp; &lt;Friends&gt;</a></li>

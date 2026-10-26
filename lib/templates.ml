@@ -45,9 +45,9 @@ let seek page pages target =
 
 let link_regex = Re.Perl.re "(href|src)=\"(.*?)\"" |> Re.compile
 
-let rebind_links_from page pages template =
+let rebind_links_from page pages html =
   Re.replace link_regex ~f:(fun groups ->
     match String.chop_prefix (Re.Pcre.get_substring groups 2) ~prefix:"seek:" with
     | Some target ->
       String.concat [Re.Pcre.get_substring groups 1; "=\""; reroute page.relative_path (seek page pages target).relative_path; "\""]
-    | None -> Re.Pcre.get_substring groups 0) template
+    | None -> Re.Pcre.get_substring groups 0) html
