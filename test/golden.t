@@ -163,3 +163,27 @@ A grammar that doesn't parse stops the build.
   camelog: bad_grammars/_grammars/broken.json: Line 1, bytes 0-1:
   Unexpected end of input
   [1]
+
+Math becomes MathML, converted by pandoc. Code spans keep their dollars.
+
+  $ mkdir math
+  $ printf 'inscribe:content' > math/_template.html
+  $ printf '## Math\n\nInline $\\omega$, display $$\\frac{1}{2}$$ and a block:\n\n```math\n\\sum_{i=0}^{n} i\n```\n\nCode keeps `$x$` as is.\n' > math/index.md
+  $ camelog math math_out
+  $ grep -o '<math display="[a-z]*"' math_out/index.html
+  <math display="inline"
+  <math display="block"
+  <math display="block"
+  $ grep -c 'camelog-math' math_out/index.html
+  0
+  [1]
+  $ grep -o '<code>[^<]*</code>' math_out/index.html
+  <code>$x$</code>
+
+Math pandoc can't convert stops the build and names the page.
+
+  $ mkdir bad_math
+  $ printf 'inscribe:content' > bad_math/_template.html
+  $ printf '$\\nosuchcommand$\n' > bad_math/index.md
+  $ camelog bad_math bad_math_out 2>&1 | head -1
+  camelog: bad_math/index.md: pandoc could not convert the math:

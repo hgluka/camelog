@@ -11,10 +11,10 @@ let interpolated template title content posts =
     | "posts" -> posts
     | name -> failwithf "inscribe:%s is not a placeholder, use inscribe:title, inscribe:content or inscribe:posts" name ()) template
 
-let md_to_html tm title md template posts =
+let render tm md =
   let r = Cmarkit_html.renderer ~safe:false () in
-  let content = Cmarkit_renderer.doc_to_string r (Highlight.highlight tm (Cmarkit.Doc.of_string ~strict:false md)) in
-  interpolated template title content posts
+  let doc, formulas = Math.extract (Highlight.highlight tm (Cmarkit.Doc.of_string ~strict:false md)) in
+  Math.render formulas (Cmarkit_renderer.doc_to_string r doc)
 
 let reroute src dest =
   let rec drop_common src_dirs dest_parts =

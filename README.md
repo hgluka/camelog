@@ -85,6 +85,12 @@ pre code [class*="-comment"] { color: #928374; }
 pre code [class*="-keyword"] { color: #fb4934; }
 ```
 
+## Math
+
+`$...$` (inline), `$$...$$` (display) and ```` ```math ```` blocks are converted to MathML at build time by [pandoc](https://pandoc.org), which must be on `PATH` for sites that use math. Browsers render MathML natively, so pages need no math JavaScript or fonts.
+
+pandoc understands most of LaTeX math, including `aligned`, matrices and `cases`. A formula it can't convert stops the build with pandoc's message and the page's path. To write a literal dollar sign in text, use `\$`.
+
 ## Building
 
 camelog needs the Oniguruma C library and its headers (`oniguruma-devel` on Void, `libonig-dev` on Debian and Ubuntu).

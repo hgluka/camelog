@@ -33,8 +33,11 @@ let process ~tm pages =
         | Markdown template_path ->
           let page_contents = In_channel.read_all page.input_path in
           let template = In_channel.read_all (regular_file template_path) in
+          let content =
+            try render tm page_contents with
+            | Failure msg -> failwithf "%s: %s" page.input_path msg () in
           let html =
-            try md_to_html tm (escape_html page.title) page_contents template posts with
+            try interpolated template (escape_html page.title) content posts with
             | Failure msg -> failwithf "%s: %s" template_path msg () in
           Out_channel.write_all page.output_path ~data:(rebind_links_from page pages html)
         | Other -> FileUtil.cp [page.input_path] page.output_path)

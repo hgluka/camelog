@@ -1,6 +1,6 @@
 (library
  (name camelog)
  (public_name camelog)
- (modules files templates pages highlight)
+ (modules files templates pages highlight math)
  (libraries core core_unix.sys_unix fileutils cmarkit re hilite hilite.markdown textmate-language yojson)
  (preprocess (pps ppx_jane)))
