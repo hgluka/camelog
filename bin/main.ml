@@ -3,6 +3,7 @@ open Util.Files
 open Util.Pages
 
 let transmute input_dir template output_dir =
+  let input_dir = String.rstrip input_dir ~drop:(Char.equal '/') in
   let site = pages input_dir output_dir template (traverse input_dir (fun path ->
       let filename = Filename.basename path in
       String.equal filename template || Stdlib.String.starts_with ~prefix:"WIP" filename) (create_dir input_dir output_dir)) in

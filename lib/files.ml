@@ -25,7 +25,7 @@ let regular_file = fun filename ->
   | `Unknown -> failwith "Could not determine if file is regular"
 
 let process pages =
-    let posts = list_of_posts pages (fun p -> Option.is_some (String.substr_index ~pattern:"posts/" p.relative_path)) in
+    let posts = list_of_posts pages is_post in
   List.map pages
     ~f:(fun page ->
         let page_contents = In_channel.with_file page.input_path ~f:(fun ic ->

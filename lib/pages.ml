@@ -33,9 +33,11 @@ let pages input_dir output_dir template paths =
           | Some "md" -> "html"
           | Some x -> x
           | None -> "" in
-        let cut_path = String.chop_prefix_if_exists (fst path_and_ext) ~prefix:input_dir in
+        let cut_path = String.chop_prefix_if_exists (fst path_and_ext) ~prefix:input_dir
+                       |> String.chop_prefix_if_exists ~prefix:"/" in
+        let relative_path = FilePath.add_extension cut_path new_ext in
         let post_title = match List.find (In_channel.read_lines path) ~f:(fun l -> is_markdown ptype && (Stdlib.String.starts_with ~prefix:"##" l)) with
-          | Some l -> String.sub l ~pos: 3 ~len:(String.length l - 3)
+          | Some l -> String.lstrip l ~drop:(Char.equal '#') |> String.strip
           | None -> Filename.basename cut_path in
         let date_re = Re.Pcre.re "\\d{4}-\\d{2}-\\d{2}" |> Re.compile in
         let date_str_opt = Option.map ~f:(fun s -> Re.Pcre.get_substring s 0) (Re.exec_opt date_re (Filename.basename cut_path)) in
@@ -43,10 +45,16 @@ let pages input_dir output_dir template paths =
           page_type = ptype;
           title = post_title;
           date = date_str_opt;
-          relative_path = String.sub (FilePath.add_extension cut_path new_ext) ~pos:1 ~len:(String.length (FilePath.add_extension cut_path new_ext) - 1);
+          relative_path;
           input_path = path;
-          output_path = Filename.concat output_dir (FilePath.add_extension cut_path new_ext)
+          output_path = Filename.concat output_dir relative_path
         })
+
+let is_post page =
+  is_markdown page.page_type &&
+  match Filename.parts page.relative_path with
+  | "." :: "posts" :: _ -> true
+  | _ -> false
 
 let pretty_page_title page =
   match page.date with

@@ -4,6 +4,8 @@ open Core
 let directory_contents =
   ["test_website/template.html";
    "test_website/posts/template.html";
+   "test_website/posts/diagram.svg";
+   "test_website/posts/2025-11-12-post-three.md";
    "test_website/posts/2025-11-11-post-two.md";
    "test_website/posts/2025-11-11-post-one.md";
    "test_website/index.md"]
@@ -19,6 +21,16 @@ let page_list : Util.Pages.page list =
      date = None; relative_path = "posts/template.html";
      input_path = "test_website/posts/template.html";
      output_path = "output_dir/posts/template.html" };
+   { page_type = Util.Pages.Other; title = "diagram";
+     date = None; relative_path = "posts/diagram.svg";
+     input_path = "test_website/posts/diagram.svg";
+     output_path = "output_dir/posts/diagram.svg" };
+   { page_type =
+       (Util.Pages.Markdown "test_website/posts/template.html");
+     title = "Post Three"; date = (Some "2025-11-12");
+     relative_path = "posts/2025-11-12-post-three.html";
+     input_path = "test_website/posts/2025-11-12-post-three.md";
+     output_path = "output_dir/posts/2025-11-12-post-three.html" };
    { page_type =
        (Util.Pages.Markdown "test_website/posts/template.html");
      title = "Post Two"; date = (Some "2025-11-11");
@@ -38,9 +50,9 @@ let page_list : Util.Pages.page list =
      output_path = "output_dir/index.html" }]
 
 let post_list = {|<ul>
+    <li><a href="posts/2025-11-12-post-three.html">2025-11-12: Post Three</a></li>
     <li><a href="posts/2025-11-11-post-two.html">2025-11-11: Post Two</a></li>
     <li><a href="posts/2025-11-11-post-one.html">2025-11-11: Post One</a></li>
-    <li><a href="posts/template.html">template</a></li>
   </ul>|}
 
 (* Util.Files tests *)
@@ -63,16 +75,19 @@ let test_interpolate () =
     (Util.Templates.interpolated "test [title]; [content]; [posts]; [other]" "TEST_TITLE" "TEST_CONTENT" "TEST_POSTS")
 
 (* Util.Pages tests *)
-let test_pages () =
+let check_pages input_dir =
   Alcotest.(check (list testable_page)) "same page list"
     page_list
     (List.sort
-       (Util.Pages.pages "test_website" "output_dir" "template.html" directory_contents)
+       (Util.Pages.pages input_dir "output_dir" "template.html" directory_contents)
        ~compare:(fun p q -> String.descending p.relative_path q.relative_path))
 
+let test_pages () = check_pages "test_website"
+
+let test_pages_trailing_slash () = check_pages "test_website/"
+
 let test_post_list () =
-  Alcotest.(check string) "same string" post_list (Util.Pages.list_of_posts page_list
-                                                     (fun f -> List.mem (Filename.parts f.relative_path) "posts" ~equal:String.equal))
+  Alcotest.(check string) "same string" post_list (Util.Pages.list_of_posts page_list Util.Pages.is_post)
 
 let () =
   let open Alcotest in
@@ -88,6 +103,7 @@ let () =
     ];
     "Util.Pages", [
       test_case "Pages test" `Quick test_pages;
+      test_case "Pages trailing slash test" `Quick test_pages_trailing_slash;
       test_case "Post list test" `Quick test_post_list;
     ]
   ]
