@@ -5,16 +5,28 @@ A static blog generator written in OCaml. It turns a directory of markdown files
 ## Usage
 
 ```
-camelog INPUT_DIR TEMPLATE OUTPUT_DIR [-grammars DIR] [-verbose]
+camelog INPUT_DIR OUTPUT_DIR [-verbose]
 ```
 
-`TEMPLATE` is a file name, not a path. Every directory that contains markdown files needs a template with that name. camelog renders each `.md` file into `OUTPUT_DIR` as `.html` and copies every other file as is. `-verbose` prints each page before building.
+camelog renders each `.md` file into `OUTPUT_DIR` as `.html` and copies every other file as is. `-verbose` prints each page before building.
 
-Files whose names start with `WIP` are skipped, and so are the templates.
+Files and folders whose names start with `_` are never rendered or copied. They hold what the site is built from rather than what it publishes:
+
+```
+source/
+  _template.html          template for pages in this folder
+  _grammars/racket.json   extra highlighting grammars
+  _drafts/new-post.md     unfinished posts
+  index.md
+  posts/
+    _template.html
+    2020-03-31-island-generation-with-typed-racket.md
+  styles/styles.css
+```
 
 ## Templates
 
-A template is an HTML file with three placeholders:
+Every folder with markdown files needs a `_template.html`. A template is an HTML file with three placeholders:
 
 - `inscribe:title` is the page title.
 - `inscribe:content` is the rendered markdown.
@@ -32,6 +44,8 @@ Any other name after `inscribe:` stops the build, so typos don't slip through.
 Posts are markdown files under `INPUT_DIR/posts/`. Name them `YYYY-MM-DD-some-title.md` and camelog sorts the post list by that date and shows it next to the title.
 
 A page's title comes from its first line starting with `##`, without the `#`s. Without one, the file name is the title.
+
+Unfinished posts go in `INPUT_DIR/_drafts/`. To publish one, move it to `posts/` with a date prefix.
 
 Markdown is rendered with [cmarkit](https://erratique.ch/software/cmarkit). Raw HTML passes through.
 
@@ -60,7 +74,7 @@ The build stops with an error if a `seek:` link matches no file or more than one
 
 Fenced code blocks are highlighted at build time with [hilite](https://github.com/patricoferris/hilite) and TextMate grammars, the format VS Code uses. No JavaScript is needed on the page.
 
-hilite includes grammars for OCaml, dune, opam, shell and diff. For other languages, put TextMate grammar `.json` files in a directory outside `INPUT_DIR` and pass it with `-grammars DIR`. [Shiki's grammar collection](https://github.com/shikijs/textmate-grammars-themes/tree/main/packages/tm-grammars) is a good source; keep each grammar's license next to it.
+hilite includes grammars for OCaml, dune, opam, shell and diff. For other languages, put TextMate grammar `.json` files in `INPUT_DIR/_grammars/`. [Shiki's grammar collection](https://github.com/shikijs/textmate-grammars-themes/tree/main/packages/tm-grammars) is a good source; keep each grammar's license next to it.
 
 A block's language is matched against each grammar's `name`, then its `fileTypes`, so ```` ```racket ```` and ```` ```rkt ```` can both find a Racket grammar. Blocks in other languages are rendered as plain code.
 

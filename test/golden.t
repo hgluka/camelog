@@ -1,6 +1,6 @@
 Build the test website and check the generated files.
 
-  $ camelog -grammars grammars test_website template.html out > /dev/null
+  $ camelog test_website out > /dev/null
   $ find out -type f | sort
   out/index.html
   out/posts/2025-11-11-post-one.html
@@ -51,7 +51,7 @@ Build the test website and check the generated files.
     <h2>Post Two</h2>
   <pre><code><span class='ocaml-keyword'>let</span><span class='ocaml-source'> </span><span class='ocaml-entity-name-function-binding'>x</span><span class='ocaml-source'> </span><span class='ocaml-keyword-operator'>=</span><span class='ocaml-source'> </span><span class='ocaml-constant-numeric-decimal-integer'>1</span><span class='ocaml-source'>
   </span></code></pre>
-  <pre><code><span class='toy-keyword-control'>let</span><span class='toy-source'> greeting = </span><span class='toy-string-quoted-double'>&quot;hi&quot;</span><span class='toy-source'> </span><span class='toy-keyword-control'>in</span><span class='toy-source'> greeting </span><span class='toy-comment-line'>-- from -grammars</span><span class='toy-source'>
+  <pre><code><span class='toy-keyword-control'>let</span><span class='toy-source'> greeting = </span><span class='toy-string-quoted-double'>&quot;hi&quot;</span><span class='toy-source'> </span><span class='toy-keyword-control'>in</span><span class='toy-source'> greeting </span><span class='toy-comment-line'>-- from _grammars</span><span class='toy-source'>
   </span></code></pre>
   <pre><code><span class='ty-keyword-control'>let</span><span class='ty-source'> x = </span><span class='ty-string-quoted-double'>&quot;found by file type&quot;</span><span class='ty-source'>
   </span></code></pre>
@@ -115,15 +115,15 @@ Build the test website and check the generated files.
 
 A trailing slash on the input directory gives the same output.
 
-  $ camelog -grammars grammars test_website/ template.html out2 > /dev/null
+  $ camelog test_website/ out2 > /dev/null
   $ diff -r out out2
 
 A seek: link that matches no file stops the build.
 
   $ mkdir broken
-  $ printf '<link href="seek:missing.css">inscribe:content' > broken/template.html
+  $ printf '<link href="seek:missing.css">inscribe:content' > broken/_template.html
   $ printf '## Broken\n' > broken/index.md
-  $ camelog broken template.html broken_out > /dev/null
+  $ camelog broken broken_out > /dev/null
   camelog: broken/index.md: seek:missing.css matches no file
   [1]
 
@@ -131,33 +131,35 @@ A missing template names the file it looked for.
 
   $ mkdir no_template
   $ printf '## No template\n' > no_template/index.md
-  $ camelog no_template template.html no_template_out
-  camelog: no_template/template.html is not a regular file
+  $ camelog no_template no_template_out
+  camelog: no_template/_template.html is not a regular file
   [1]
 
 A site without subdirectories still creates the output directory.
 
   $ mkdir flat
-  $ printf 'inscribe:content' > flat/template.html
+  $ printf 'inscribe:content' > flat/_template.html
   $ printf '## Flat\n' > flat/index.md
-  $ camelog flat template.html flat_out
+  $ camelog flat flat_out
   $ cat flat_out/index.html
   <h2>Flat</h2>
 
 An unknown inscribe: placeholder stops the build and names the template.
 
   $ mkdir typo
-  $ printf 'inscribe:contnet' > typo/template.html
+  $ printf 'inscribe:contnet' > typo/_template.html
   $ printf '## Typo\n' > typo/index.md
-  $ camelog typo template.html typo_out
-  camelog: typo/template.html: inscribe:contnet is not a placeholder, use inscribe:title, inscribe:content or inscribe:posts
+  $ camelog typo typo_out
+  camelog: typo/_template.html: inscribe:contnet is not a placeholder, use inscribe:title, inscribe:content or inscribe:posts
   [1]
 
 A grammar that doesn't parse stops the build.
 
-  $ mkdir bad_grammars
-  $ printf '{' > bad_grammars/broken.json
-  $ camelog -grammars bad_grammars test_website template.html bad_out
-  camelog: bad_grammars/broken.json: Line 1, bytes 0-1:
+  $ mkdir -p bad_grammars/_grammars
+  $ printf 'inscribe:content' > bad_grammars/_template.html
+  $ printf '## Bad grammars\n' > bad_grammars/index.md
+  $ printf '{' > bad_grammars/_grammars/broken.json
+  $ camelog bad_grammars bad_out
+  camelog: bad_grammars/_grammars/broken.json: Line 1, bytes 0-1:
   Unexpected end of input
   [1]

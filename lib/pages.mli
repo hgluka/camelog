@@ -17,9 +17,9 @@ type page = {
 (** [relative_to input_dir path] is [path] without the [input_dir] prefix and leading [/]. *)
 val relative_to : string -> string -> string
 
-(** [pages input_dir output_dir template paths] describes each file in [paths].
-    Markdown files use the file named [template] in their own directory. *)
-val pages : string -> string -> string -> string list -> page list
+(** [pages input_dir output_dir paths] describes each file in [paths].
+    Markdown files use the [_template.html] in their own directory. *)
+val pages : string -> string -> string list -> page list
 
 (** A markdown page under [posts/]. *)
 val is_post : page -> bool

@@ -14,11 +14,13 @@ let grammar_of_file path =
 let grammars dir =
   let tm = TmLanguage.create () in
   List.iter builtin ~f:(fun json -> TmLanguage.add_grammar tm (TmLanguage.of_yojson_exn json));
-  Option.iter dir ~f:(fun dir ->
-    Sys_unix.ls_dir dir
-    |> List.filter ~f:(String.is_suffix ~suffix:".json")
-    |> List.sort ~compare:String.compare
-    |> List.iter ~f:(fun file -> TmLanguage.add_grammar tm (grammar_of_file (Filename.concat dir file))));
+  (match Sys_unix.is_directory dir with
+   | `Yes ->
+     Sys_unix.ls_dir dir
+     |> List.filter ~f:(String.is_suffix ~suffix:".json")
+     |> List.sort ~compare:String.compare
+     |> List.iter ~f:(fun file -> TmLanguage.add_grammar tm (grammar_of_file (Filename.concat dir file)))
+   | `No | `Unknown -> ());
   tm
 
 let highlight tm doc =

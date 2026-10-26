@@ -25,11 +25,11 @@ let relative_to input_dir path =
 
 let date_re = Re.Pcre.re "\\d{4}-\\d{2}-\\d{2}" |> Re.compile
 
-let pages input_dir output_dir template paths =
+let pages input_dir output_dir paths =
   List.map paths
     ~f:(fun path ->
         let path_and_ext = Filename.split_extension path in
-        let template_file = Filename.concat (Filename.dirname path) template in
+        let template_file = Filename.concat (Filename.dirname path) "_template.html" in
         let ptype = match snd path_and_ext with
           | Some "md" -> Markdown template_file
           | _ -> Other in

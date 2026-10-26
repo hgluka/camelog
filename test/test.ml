@@ -2,9 +2,7 @@ open Core
 
 (* Setup *)
 let directory_contents =
-  ["test_website/template.html";
-   "test_website/styles.css";
-   "test_website/posts/template.html";
+  ["test_website/styles.css";
    "test_website/posts/diagram.svg";
    "test_website/posts/2025-11-12-post-three.md";
    "test_website/posts/2025-11-11-post-two.md";
@@ -15,42 +13,34 @@ let testable_page =
   Alcotest.testable (fun fmt p -> Sexp.pp_hum fmt (Camelog.Pages.sexp_of_page p)) Camelog.Pages.equal_page
 
 let page_list : Camelog.Pages.page list =
-  [{ page_type = Camelog.Pages.Other; title = "template";
-     date = None; relative_path = "template.html";
-     input_path = "test_website/template.html";
-     output_path = "output_dir/template.html" };
-   { page_type = Camelog.Pages.Other; title = "styles";
+  [{ page_type = Camelog.Pages.Other; title = "styles";
      date = None; relative_path = "styles.css";
      input_path = "test_website/styles.css";
      output_path = "output_dir/styles.css" };
-   { page_type = Camelog.Pages.Other; title = "template";
-     date = None; relative_path = "posts/template.html";
-     input_path = "test_website/posts/template.html";
-     output_path = "output_dir/posts/template.html" };
    { page_type = Camelog.Pages.Other; title = "diagram";
      date = None; relative_path = "posts/diagram.svg";
      input_path = "test_website/posts/diagram.svg";
      output_path = "output_dir/posts/diagram.svg" };
    { page_type =
-       (Camelog.Pages.Markdown "test_website/posts/template.html");
+       (Camelog.Pages.Markdown "test_website/posts/_template.html");
      title = "Post Three & <Friends>"; date = (Some "2025-11-12");
      relative_path = "posts/2025-11-12-post-three.html";
      input_path = "test_website/posts/2025-11-12-post-three.md";
      output_path = "output_dir/posts/2025-11-12-post-three.html" };
    { page_type =
-       (Camelog.Pages.Markdown "test_website/posts/template.html");
+       (Camelog.Pages.Markdown "test_website/posts/_template.html");
      title = "Post Two"; date = (Some "2025-11-11");
      relative_path = "posts/2025-11-11-post-two.html";
      input_path = "test_website/posts/2025-11-11-post-two.md";
      output_path = "output_dir/posts/2025-11-11-post-two.html" };
    { page_type =
-       (Camelog.Pages.Markdown "test_website/posts/template.html");
+       (Camelog.Pages.Markdown "test_website/posts/_template.html");
      title = "Post One"; date = (Some "2025-11-11");
      relative_path = "posts/2025-11-11-post-one.html";
      input_path = "test_website/posts/2025-11-11-post-one.md";
      output_path = "output_dir/posts/2025-11-11-post-one.html" };
    { page_type =
-       (Camelog.Pages.Markdown "test_website/template.html");
+       (Camelog.Pages.Markdown "test_website/_template.html");
      title = "index"; date = None; relative_path = "index.html";
      input_path = "test_website/index.md";
      output_path = "output_dir/index.html" }]
@@ -70,7 +60,11 @@ let test_regular_file_fail () =
 
 let test_traverse () =
   Alcotest.(check (list string)) "same directory content list"
-    directory_contents (List.sort (Camelog.Files.traverse "test_website" (fun _ -> false) (fun _ -> ())) ~compare:String.descending)
+    directory_contents (List.sort (Camelog.Files.traverse "test_website" Camelog.Files.unpublished (fun _ -> ())) ~compare:String.descending)
+
+let test_unpublished () =
+  Alcotest.(check (list bool)) "same flags" [true; true; true; false; false]
+    (List.map ~f:Camelog.Files.unpublished ["_template.html"; "_drafts"; "posts/_notes.md"; "posts"; "my_post.md"])
 
 (* Camelog.Templates tests *)
 let test_reroute () =
@@ -105,8 +99,10 @@ let test_seek_missing () =
 
 let test_seek_ambiguous () =
   Alcotest.check_raises "same failure"
-    (Failure "test_website/posts/2025-11-11-post-one.md: seek:template.html matches several files: template.html, posts/template.html")
-    (fun () -> ignore (rebind {|<a href="seek:template.html">|}))
+    (Failure "test_website/posts/2025-11-11-post-one.md: seek:styles.css matches several files: styles.css, posts/styles.css")
+    (fun () ->
+       let second_styles = { (List.hd_exn page_list) with relative_path = "posts/styles.css" } in
+       ignore (Camelog.Templates.rebind_links_from post_one (page_list @ [second_styles]) {|<link href="seek:styles.css">|}))
 
 let test_seek_relative_path () =
   Alcotest.check_raises "same failure"
@@ -127,7 +123,7 @@ let check_pages input_dir =
   Alcotest.(check (list testable_page)) "same page list"
     page_list
     (List.sort
-       (Camelog.Pages.pages input_dir "output_dir" "template.html" directory_contents)
+       (Camelog.Pages.pages input_dir "output_dir" directory_contents)
        ~compare:(fun p q -> String.descending p.relative_path q.relative_path))
 
 let test_pages () = check_pages "test_website"
@@ -144,6 +140,7 @@ let () =
       test_case "Regular file test positive" `Quick test_regular_file_success;
       test_case "Regular file test negative" `Quick test_regular_file_fail;
       test_case "Directory traversal test" `Quick test_traverse;
+      test_case "Unpublished names test" `Quick test_unpublished;
     ];
     "Camelog.Templates", [
       test_case "Reroute test" `Quick test_reroute;

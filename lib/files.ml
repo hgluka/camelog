@@ -6,6 +6,8 @@ let create_dir input_dir output_dir p =
   (if not (String.is_empty output_dir)
    then (FileUtil.mkdir ~parent:true ~mode:(`Octal 0o755) (Filename.concat output_dir (relative_to input_dir p))))
 
+let unpublished name = String.is_prefix (Filename.basename name) ~prefix:"_"
+
 let rec traverse input_dir exclude apply_to_dir =
   let flat_contents = Sys_unix.ls_dir input_dir in
   let contents = List.map (List.filter flat_contents ~f:(fun p -> not (exclude p)))
