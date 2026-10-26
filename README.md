@@ -91,6 +91,25 @@ pre code [class*="-keyword"] { color: #fb4934; }
 
 pandoc understands most of LaTeX math, including `aligned`, matrices and `cases`. A formula it can't convert stops the build with pandoc's message and the page's path. To write a literal dollar sign in text, use `\$`.
 
+## TikZ figures
+
+```` ```tikz ```` blocks are compiled with `latex` and `dvisvgm` at build time and inlined as SVG, so figures need no JavaScript or images. The block holds the picture itself, for example a `tikzpicture` or a `tikz-cd` diagram:
+
+````markdown
+```tikz
+\begin{tikzcd}
+A \arrow[r, "f"] \arrow[d, "g"'] & B \arrow[d, "h"] \\
+C \arrow[r, "k"'] & D
+\end{tikzcd}
+```
+````
+
+Each figure is wrapped in a `standalone` document that loads `tikz`, `tikz-cd` and the `arrows.meta`, `positioning` and `automata` libraries. Put your own preamble in `INPUT_DIR/_tikz.tex` to replace it; it must start with `\documentclass[dvisvgm]{standalone}`.
+
+Black is drawn as `currentColor`, so figures take the colour of the surrounding text. Each SVG sits in a `<div class="tikz">` for styling. A figure that doesn't compile stops the build with LaTeX's error lines. Sites without TikZ blocks don't need TeX at all.
+
+With TeX Live, the needed packages are `scheme-basic pgf tikz-cd standalone dvisvgm`.
+
 ## Building
 
 camelog needs the Oniguruma C library and its headers (`oniguruma-devel` on Void, `libonig-dev` on Debian and Ubuntu).

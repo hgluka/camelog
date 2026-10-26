@@ -5,10 +5,11 @@ open Camelog.Pages
 let transmute ~verbose input_dir output_dir =
   let input_dir = String.rstrip input_dir ~drop:(Char.equal '/') in
   let tm = Camelog.Highlight.grammars (Filename.concat input_dir "_grammars") in
+  let preamble = Camelog.Tikz.preamble (Filename.concat input_dir "_tikz.tex") in
   create_dir input_dir output_dir input_dir;
   let site = pages input_dir output_dir (traverse input_dir unpublished (create_dir input_dir output_dir)) in
   if verbose then List.iter site ~f:(fun page -> print_s (sexp_of_page page));
-  process ~tm site
+  process ~tm ~preamble site
 
 let command =
   Command.basic

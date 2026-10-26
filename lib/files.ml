@@ -25,7 +25,7 @@ let regular_file = fun filename ->
   | `No -> failwithf "%s is not a regular file" filename ()
   | `Unknown -> failwithf "could not determine if %s is a regular file" filename ()
 
-let process ~tm pages =
+let process ~tm ~preamble pages =
   let posts = list_of_posts pages is_post in
   List.iter pages
     ~f:(fun page ->
@@ -34,7 +34,7 @@ let process ~tm pages =
           let page_contents = In_channel.read_all page.input_path in
           let template = In_channel.read_all (regular_file template_path) in
           let content =
-            try render tm page_contents with
+            try render tm preamble page_contents with
             | Failure msg -> failwithf "%s: %s" page.input_path msg () in
           let html =
             try interpolated template (escape_html page.title) content posts with

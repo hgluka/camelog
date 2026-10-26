@@ -187,3 +187,54 @@ Math pandoc can't convert stops the build and names the page.
   $ printf '$\\nosuchcommand$\n' > bad_math/index.md
   $ camelog bad_math bad_math_out 2>&1 | head -1
   camelog: bad_math/index.md: pandoc could not convert the math:
+
+TikZ blocks become inline SVG. Black becomes currentColor, and each figure
+gets its own id prefix so glyphs don't clash.
+
+  $ mkdir tikz
+  $ printf 'inscribe:content' > tikz/_template.html
+  $ cat > tikz/index.md <<'MD'
+  > ```tikz
+  > \begin{tikzcd}
+  > A \arrow[r, "f"] & B
+  > \end{tikzcd}
+  > ```
+  > 
+  > ```tikz
+  > \begin{tikzpicture}
+  > \node[state, initial] (q0) {$q_0$};
+  > \end{tikzpicture}
+  > ```
+  > MD
+  $ camelog tikz tikz_out
+  $ grep -c '<div class="tikz"><svg' tikz_out/index.html
+  2
+  $ grep -o "id='tikz[0-9]-" tikz_out/index.html | sort -u
+  id='tikz0-
+  id='tikz1-
+  $ grep -q currentColor tikz_out/index.html && echo uses currentColor
+  uses currentColor
+  $ grep -c '<?xml' tikz_out/index.html
+  0
+  [1]
+
+A _tikz.tex preamble replaces the default one.
+
+  $ mkdir tikz_preamble
+  $ printf 'inscribe:content' > tikz_preamble/_template.html
+  $ printf '\\documentclass[dvisvgm]{standalone}\n\\usepackage{tikz}\n\\newcommand{\\camelogdot}{\\fill (0,0) circle (1pt);}\n' > tikz_preamble/_tikz.tex
+  $ printf '```tikz\n\\begin{tikzpicture}\\camelogdot\\end{tikzpicture}\n```\n' > tikz_preamble/index.md
+  $ camelog tikz_preamble tikz_preamble_out
+  $ grep -c '<svg' tikz_preamble_out/index.html
+  1
+
+A figure LaTeX can't compile stops the build with LaTeX's error lines.
+
+  $ mkdir bad_tikz
+  $ printf 'inscribe:content' > bad_tikz/_template.html
+  $ printf '```tikz\n\\begin{tikzpicture}\\nosuchmacro\\end{tikzpicture}\n```\n' > bad_tikz/index.md
+  $ camelog bad_tikz bad_tikz_out
+  camelog: bad_tikz/index.md: LaTeX could not compile a TikZ figure:
+  ! Undefined control sequence.
+  l.6 \begin{tikzpicture}\nosuchmacro
+  [1]

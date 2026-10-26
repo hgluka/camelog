@@ -5,9 +5,10 @@
     [inscribe:] name. *)
 val interpolated : string -> string -> string -> string -> string
 
-(** [render tm md] renders markdown to HTML, highlighting code blocks with the
-    grammars in [tm] and converting math to MathML. *)
-val render : TmLanguage.t -> string -> string
+(** [render tm preamble md] renders markdown to HTML, highlighting code blocks
+    with the grammars in [tm], converting math to MathML and compiling TikZ
+    figures with [preamble]. *)
+val render : TmLanguage.t -> string -> string -> string
 
 (** [reroute src dest] is the relative link from page [src] to [dest]. *)
 val reroute : string -> string -> string

@@ -2,13 +2,11 @@ open Core
 
 type formula = { tex: string; display: bool }
 
-let marker i = sprintf "<!--camelog-math-%d-->" i
-
 let extract doc =
   let formulas = ref [] in
   let add formula =
     formulas := formula :: !formulas;
-    marker (List.length !formulas - 1) in
+    Placeholder.marker "math" (List.length !formulas - 1) in
   let inline _ = function
     | Cmarkit.Inline.Ext_math_span (span, meta) ->
       let m = Cmarkit.Inline.Math_span.(add { tex = tex span; display = display span }) in
@@ -30,17 +28,10 @@ let pandoc_input formulas =
   |> String.concat ~sep:"\n\n"
 
 let run_pandoc input =
-  let args = [|"pandoc"; "--from=markdown"; "--to=html"; "--mathml"; "--wrap=none"; "--fail-if-warnings"|] in
-  let stdout, stdin, stderr =
-    try Caml_unix.open_process_args_full "pandoc" args (Caml_unix.environment ()) with
-    | Caml_unix.Unix_error (Caml_unix.ENOENT, _, _) -> failwith "math needs pandoc, which was not found on PATH" in
-  Out_channel.output_string stdin input;
-  Out_channel.close stdin;
-  let output = In_channel.input_all stdout in
-  let errors = In_channel.input_all stderr in
-  match Caml_unix.close_process_full (stdout, stdin, stderr) with
-  | Caml_unix.WEXITED 0 -> output
-  | _ -> failwithf "pandoc could not convert the math:\n%s" (String.rstrip errors) ()
+  match Tool.run ~input ~missing:"math needs pandoc, which was not found on PATH" "pandoc"
+          ["--from=markdown"; "--to=html"; "--mathml"; "--wrap=none"; "--fail-if-warnings"] with
+  | Ok output -> output
+  | Error errors -> failwithf "pandoc could not convert the math:\n%s" (String.rstrip errors) ()
 
 let to_mathml formulas =
   run_pandoc (pandoc_input formulas)
@@ -55,5 +46,4 @@ let render formulas html =
     let mathml = to_mathml formulas in
     if List.length mathml <> List.length formulas then
       failwithf "pandoc returned %d formulas for %d" (List.length mathml) (List.length formulas) ();
-    List.foldi mathml ~init:html ~f:(fun i html m ->
-      String.substr_replace_first html ~pattern:(marker i) ~with_:m)
+    Placeholder.fill "math" mathml html
