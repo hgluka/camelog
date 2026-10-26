@@ -56,6 +56,11 @@ let is_post page =
   | "." :: "posts" :: _ -> true
   | _ -> false
 
+let escape_html s =
+  let buf = Buffer.create (String.length s) in
+  Cmarkit_html.buffer_add_html_escaped_string buf s;
+  Buffer.contents buf
+
 let pretty_page_title page =
   match page.date with
   | Some d -> String.concat [d; ": "; page.title]
@@ -69,6 +74,6 @@ let compare_posts p q =
 let list_of_posts pages filter =
   String.concat ["<ul>\n    <li>"; String.concat ~sep:"</li>\n    <li>"
                    (List.filter_map (List.sort pages ~compare:compare_posts) ~f:(fun p -> if filter p
-                                               then Some (String.concat ["<a href=\""; p.relative_path; "\">"; pretty_page_title p; "</a>"])
+                                               then Some (String.concat ["<a href=\"seek:/"; p.relative_path; "\">"; escape_html (pretty_page_title p); "</a>"])
                                                else None));
                  "</li>\n  </ul>"]

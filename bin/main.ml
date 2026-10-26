@@ -22,6 +22,8 @@ let command =
       and output_dir =
         anon ("output_dir" %: string)
      in
-     fun () -> transmute input_dir template output_dir)
+     fun () ->
+       try transmute input_dir template output_dir with
+       | Failure msg -> eprintf "camelog: %s\n" msg; Stdlib.exit 1)
 
 let () = Command_unix.run ~version:"1.0" command

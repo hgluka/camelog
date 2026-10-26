@@ -3,6 +3,7 @@ open Core
 (* Setup *)
 let directory_contents =
   ["test_website/template.html";
+   "test_website/styles.css";
    "test_website/posts/template.html";
    "test_website/posts/diagram.svg";
    "test_website/posts/2025-11-12-post-three.md";
@@ -17,6 +18,10 @@ let page_list : Util.Pages.page list =
      date = None; relative_path = "template.html";
      input_path = "test_website/template.html";
      output_path = "output_dir/template.html" };
+   { page_type = Util.Pages.Css; title = "styles";
+     date = None; relative_path = "styles.css";
+     input_path = "test_website/styles.css";
+     output_path = "output_dir/styles.css" };
    { page_type = Util.Pages.Other; title = "template";
      date = None; relative_path = "posts/template.html";
      input_path = "test_website/posts/template.html";
@@ -27,7 +32,7 @@ let page_list : Util.Pages.page list =
      output_path = "output_dir/posts/diagram.svg" };
    { page_type =
        (Util.Pages.Markdown "test_website/posts/template.html");
-     title = "Post Three"; date = (Some "2025-11-12");
+     title = "Post Three & <Friends>"; date = (Some "2025-11-12");
      relative_path = "posts/2025-11-12-post-three.html";
      input_path = "test_website/posts/2025-11-12-post-three.md";
      output_path = "output_dir/posts/2025-11-12-post-three.html" };
@@ -50,9 +55,9 @@ let page_list : Util.Pages.page list =
      output_path = "output_dir/index.html" }]
 
 let post_list = {|<ul>
-    <li><a href="posts/2025-11-12-post-three.html">2025-11-12: Post Three</a></li>
-    <li><a href="posts/2025-11-11-post-two.html">2025-11-11: Post Two</a></li>
-    <li><a href="posts/2025-11-11-post-one.html">2025-11-11: Post One</a></li>
+    <li><a href="seek:/posts/2025-11-12-post-three.html">2025-11-12: Post Three &amp; &lt;Friends&gt;</a></li>
+    <li><a href="seek:/posts/2025-11-11-post-two.html">2025-11-11: Post Two</a></li>
+    <li><a href="seek:/posts/2025-11-11-post-one.html">2025-11-11: Post One</a></li>
   </ul>|}
 
 (* Util.Files tests *)
@@ -69,6 +74,43 @@ let test_traverse () =
 (* Util.Templates tests *)
 let test_reroute () =
   Alcotest.(check string) "same filename" "../index.md" (Util.Templates.reroute "posts/2025-11-11-post-one.md" "index.md")
+
+let test_reroute_same_dir () =
+  Alcotest.(check string) "same filename" "2025-11-11-post-two.html"
+    (Util.Templates.reroute "posts/2025-11-11-post-one.html" "posts/2025-11-11-post-two.html")
+
+let test_reroute_subdir () =
+  Alcotest.(check string) "same filename" "posts/2025-11-11-post-two.html"
+    (Util.Templates.reroute "index.html" "posts/2025-11-11-post-two.html")
+
+let post_one = List.find_exn page_list ~f:(fun p -> String.equal p.relative_path "posts/2025-11-11-post-one.html")
+
+let rebind template = Util.Templates.rebind_links_from post_one page_list template
+
+let test_seek_path () =
+  Alcotest.(check string) "same string" {|<a href="../index.html">|} (rebind {|<a href="seek:/index.md">|})
+
+let test_seek_name () =
+  Alcotest.(check string) "same string" {|<link href="../styles.css">|} (rebind {|<link href="seek:styles.css">|})
+
+let test_seek_leaves_other_links () =
+  let template = {|<a href="https://example.com/index.html"><img src="index.html">|} in
+  Alcotest.(check string) "same string" template (rebind template)
+
+let test_seek_missing () =
+  Alcotest.check_raises "same failure"
+    (Failure "test_website/posts/2025-11-11-post-one.md: seek:missing.css matches no file")
+    (fun () -> ignore (rebind {|<link href="seek:missing.css">|}))
+
+let test_seek_ambiguous () =
+  Alcotest.check_raises "same failure"
+    (Failure "test_website/posts/2025-11-11-post-one.md: seek:template.html matches several files: template.html, posts/template.html")
+    (fun () -> ignore (rebind {|<a href="seek:template.html">|}))
+
+let test_seek_relative_path () =
+  Alcotest.check_raises "same failure"
+    (Failure "test_website/posts/2025-11-11-post-one.md: seek:posts/x.md must be an exact path starting with / or a file name without /")
+    (fun () -> ignore (rebind {|<a href="seek:posts/x.md">|}))
 
 let test_interpolate () =
   Alcotest.(check string) "same string" "test TEST_TITLE; TEST_CONTENT; TEST_POSTS; [other]"
@@ -99,6 +141,14 @@ let () =
     ];
     "Util.Templates", [
       test_case "Reroute test" `Quick test_reroute;
+      test_case "Reroute same directory test" `Quick test_reroute_same_dir;
+      test_case "Reroute subdirectory test" `Quick test_reroute_subdir;
+      test_case "Seek exact path test" `Quick test_seek_path;
+      test_case "Seek by name test" `Quick test_seek_name;
+      test_case "Seek leaves other links test" `Quick test_seek_leaves_other_links;
+      test_case "Seek missing file test" `Quick test_seek_missing;
+      test_case "Seek ambiguous name test" `Quick test_seek_ambiguous;
+      test_case "Seek relative path test" `Quick test_seek_relative_path;
       test_case "Interpolation test" `Quick test_interpolate;
     ];
     "Util.Pages", [
