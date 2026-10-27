@@ -15,6 +15,7 @@ jobs:
           - ubuntu-latest
 
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
 
     steps:
       - name: Checkout tree
@@ -23,9 +24,24 @@ jobs:
       - name: Set-up OCaml
         uses: ocaml/setup-ocaml@v3
         with:
-          ocaml-compiler: 5
+          ocaml-compiler: 5.4.0
+          dune-cache: true
 
-      - run: sudo apt-get install -y pandoc texlive-latex-base texlive-latex-extra texlive-pictures
+      - name: Cache opam dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.opam
+            _opam
+          key: opam-${{ runner.os }}-5.4.0-${{ hashFiles('*.opam') }}
+
+      - name: Install pandoc and TeX
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          sudo rm -f /var/lib/man-db/auto-update
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends pandoc texlive-latex-base texlive-pictures dvisvgm
 
       - run: opam install . --deps-only --with-test
 

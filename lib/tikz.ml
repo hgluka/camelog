@@ -1,6 +1,8 @@
 open Core
 
-let default_preamble = {|\documentclass[dvisvgm]{standalone}
+let default_preamble = {|\documentclass{article}
+\pagestyle{empty}
+\def\pgfsysdriver{pgfsys-dvisvgm.def}
 \usepackage{tikz}
 \usepackage{tikz-cd}
 \usetikzlibrary{arrows.meta,positioning,automata}

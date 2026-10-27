@@ -222,7 +222,7 @@ A _tikz.tex preamble replaces the default one.
 
   $ mkdir tikz_preamble
   $ printf 'inscribe:content' > tikz_preamble/_template.html
-  $ printf '\\documentclass[dvisvgm]{standalone}\n\\usepackage{tikz}\n\\newcommand{\\camelogdot}{\\fill (0,0) circle (1pt);}\n' > tikz_preamble/_tikz.tex
+  $ printf '\\documentclass{article}\n\\pagestyle{empty}\n\\def\\pgfsysdriver{pgfsys-dvisvgm.def}\n\\usepackage{tikz}\n\\newcommand{\\camelogdot}{\\fill (0,0) circle (1pt);}\n' > tikz_preamble/_tikz.tex
   $ printf '```tikz\n\\begin{tikzpicture}\\camelogdot\\end{tikzpicture}\n```\n' > tikz_preamble/index.md
   $ camelog tikz_preamble tikz_preamble_out
   $ grep -c '<svg' tikz_preamble_out/index.html
@@ -236,7 +236,7 @@ A figure LaTeX can't compile stops the build with LaTeX's error lines.
   $ camelog bad_tikz bad_tikz_out
   camelog: bad_tikz/index.md: LaTeX could not compile a TikZ figure:
   ! Undefined control sequence.
-  l.6 \begin{tikzpicture}\nosuchmacro
+  l.8 \begin{tikzpicture}\nosuchmacro
   [1]
 
 seek: finds files with spaces and non-ASCII letters in their names, even

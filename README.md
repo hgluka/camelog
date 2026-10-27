@@ -115,11 +115,20 @@ C \arrow[r, "k"'] & D
 ```
 ````
 
-Each figure is wrapped in a `standalone` document that loads `tikz`, `tikz-cd` and the `arrows.meta`, `positioning` and `automata` libraries. Put your own preamble in `INPUT_DIR/_tikz.tex` to replace it; it must start with `\documentclass[dvisvgm]{standalone}`.
+Each figure is wrapped in a document that loads `tikz`, `tikz-cd` and the `arrows.meta`, `positioning` and `automata` libraries. Put your own preamble in `INPUT_DIR/_tikz.tex` to replace it. It should select pgf's dvisvgm driver before loading TikZ, as the default does:
+
+```latex
+\documentclass{article}
+\pagestyle{empty}
+\def\pgfsysdriver{pgfsys-dvisvgm.def}
+\usepackage{tikz}
+```
+
+dvisvgm crops each figure to what it draws, so the page layout doesn't matter.
 
 Black is drawn as `currentColor`, so figures take the colour of the surrounding text. Each SVG sits in a `<div class="tikz">` for styling. A figure that doesn't compile stops the build with LaTeX's error lines. Sites without TikZ blocks don't need TeX at all.
 
-With TeX Live, the needed packages are `scheme-basic pgf tikz-cd standalone dvisvgm`.
+With TeX Live, the needed packages are `scheme-basic pgf tikz-cd dvisvgm`. On Debian and Ubuntu, they are `texlive-latex-base texlive-pictures dvisvgm`.
 
 ## Building
 
